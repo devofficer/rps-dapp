@@ -3,7 +3,11 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import List from '@mui/material/List';
-import ListItemButton from '@mui/material/ListItemButton';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import Box from '@mui/material/Box';
+import wallets from 'config/wallets';
+import { blue } from '@mui/material/colors';
 
 type WalletSelectorProps = {
   open: boolean;
@@ -17,8 +21,24 @@ const WalletSelector: React.FC<WalletSelectorProps> = ({ open, onSelectWallet, o
       <DialogTitle>
         Connect Your Wallet
       </DialogTitle>
-      <DialogContent>
+      <DialogContent sx={{ px: 0 }}>
         <List>
+          {wallets.map(wallet => (
+            <ListItem
+              button
+              secondaryAction={
+                <Box display="flex" alignItems="center">
+                  <wallet.icon fontSize="large" />
+                </Box>
+              }
+              sx={{ minWidth: 300 }}
+            >
+              <ListItemText
+                primary={wallet.title}
+                sx={{ color: blue[800], fontWeight: 'bold' }}
+              />
+            </ListItem>
+          ))}
         </List>
       </DialogContent>
     </Dialog>
