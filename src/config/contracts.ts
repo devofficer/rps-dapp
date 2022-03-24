@@ -5,6 +5,6 @@ export enum Testnet {
 export const NETWORK = Testnet.rinkedby;
 export const CONTRACT_DEPLOYMENT = {
   rinkedby: {
-    Hasher: '0xd9145CCE52D386f254917e481eB44e9943F39138',
+    Hasher: '0x902E1E01c2D954815182955a1E63924f1f2C4AFA',
   },
 };

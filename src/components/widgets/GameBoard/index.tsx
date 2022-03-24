@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -6,11 +6,16 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { useWallet } from 'use-wallet';
 import rps, { Move } from 'config/rps';
-import { createGameContract } from './helpers';
+import { createGameContract, getCommitment } from './helpers';
+import CreateGameDialog from './CreateGameDialog';
 
 const GameBoard: React.FC = () => {
   const wallet = useWallet();
   const [movement, setMovement] = useState<Move>(Move.Null);
+  const [createOpen, setCreateOpen] = useState<boolean>(false);
+
+  const salt = useRef(Math.floor(Math.random() * 10000));
+  const commitment = useRef('');
 
   const handleMovementChange = (
     event: React.MouseEvent<HTMLElement>,
@@ -20,7 +25,12 @@ const GameBoard: React.FC = () => {
   };
 
   const handleCreateGame = async (event: React.MouseEvent<HTMLElement>) => {
-    const gameContract = await createGameContract(wallet, ['0x7FCb6CBda07C3043717303DC643923CE0C506aCB', '0x7FCb6CBda07C3043717303DC643923CE0C506aCB']);
+    commitment.current = await getCommitment(wallet, movement, salt.current);
+    setCreateOpen(true);
+  };
+
+  const handleCreateConfirming = async (staking: string, player: string) => {
+    const gameContract = await createGameContract(wallet, parseFloat(staking), [commitment.current, player]);
     console.log(gameContract);
   };
 
@@ -73,6 +83,11 @@ const GameBoard: React.FC = () => {
       >
         Join Game
       </Button>
+      <CreateGameDialog
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreate={handleCreateConfirming}
+      />
     </Box>
   )
 };
