@@ -12,6 +12,10 @@ const WalletConnector: React.FC = () => {
     setOpen(true);
   };
 
+  const handleDisconnect = (event: React.MouseEvent<HTMLElement>) => {
+    wallet.reset();
+  };
+
   const handleClose = () => {
     setOpen(false);
   };
@@ -23,14 +27,25 @@ const WalletConnector: React.FC = () => {
 
   return (
     <>
-      <Button
-        variant="contained"
-        color="secondary"
-        startIcon={<AccountBalanceWalletIcon />}
-        onClick={handleConnect}
-      >
-        Connect Wallet
-      </Button>
+      {wallet.status === 'connected' ? (
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={handleDisconnect}
+          sx={{ textTransform: 'none' }}
+        >
+          {`${wallet.account?.slice(0, 6)}...${wallet.account?.slice(-5)}`}
+        </Button>
+      ) : (
+        <Button
+          variant="contained"
+          color="secondary"
+          startIcon={<AccountBalanceWalletIcon />}
+          onClick={handleConnect}
+        >
+          Connect Wallet
+        </Button>
+      )}
       <WalletSelector
         open={open}
         onClose={handleClose}
