@@ -4,9 +4,9 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-
 import { useWallet } from 'use-wallet';
 import rps, { Move } from 'config/rps';
+import { createGameContract } from './helpers';
 
 const GameBoard: React.FC = () => {
   const wallet = useWallet();
@@ -19,8 +19,9 @@ const GameBoard: React.FC = () => {
     setMovement(newMovement);
   };
 
-  const handleCreateGame = (event: React.MouseEvent<HTMLElement>) => {
-
+  const handleCreateGame = async (event: React.MouseEvent<HTMLElement>) => {
+    const gameContract = await createGameContract(wallet, ['0x7FCb6CBda07C3043717303DC643923CE0C506aCB', '0x7FCb6CBda07C3043717303DC643923CE0C506aCB']);
+    console.log(gameContract);
   };
 
   const handleJoinGame = (event: React.MouseEvent<HTMLElement>) => {
