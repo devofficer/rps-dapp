@@ -16,13 +16,13 @@ type WalletSelectorProps = {
 const useStyles = makeStyles(theme => ({
   button: {
     marginBottom: theme.spacing(2),
-    minWidth: 250,
+    minWidth: 300,
     fontSize: 20,
     fontWeight: 'bold',
     textTransform: 'none',
     justifyContent: 'space-between',
     borderRadius: 16,
-    padding: theme.spacing(1, 5),
+    padding: theme.spacing(1, 3),
   }
 }));
 
@@ -44,8 +44,11 @@ const WalletSelector: React.FC<WalletSelectorProps> = ({ open, onSelectWallet, o
               color="secondary"
               className={classes.button}
               onClick={() => onSelectWallet(wallet.id)}
+              disabled={wallet.disabled}
             >
-              {wallet.title}
+              <Box flexGrow={1}>
+                {wallet.title}
+              </Box>
               <wallet.icon fontSize="large" />
             </Button>
           ))}
