@@ -16,7 +16,7 @@ const JoinedGame: React.FC = () => {
 
   const { addr, timestamp } = useParams();
   const [player1Solved, setPlayer1Solved] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [result, setResult] = useState<string>('');
   const [intervalId, setIntervalId] = useState<number>(0);
   const [player1Timeouted, setPlayer1Timeouted] = useState<boolean>(false);
@@ -36,6 +36,7 @@ const JoinedGame: React.FC = () => {
         clearInterval(intervalId);
         setIntervalId(0);
         setPlayer1Solved(true);
+        setLoading(false);
       }
     } else if (!player1Timeouted) {
       const currentTime = new Date().getTime();
@@ -46,7 +47,6 @@ const JoinedGame: React.FC = () => {
         clearInterval(intervalId);
         setIntervalId(0);
         setPlayer1Timeouted(true);
-        setLoading(true);
 
         const timeouted = await player1Timeout({ wallet, gameContractAddr: addr as string });
 
@@ -83,7 +83,7 @@ const JoinedGame: React.FC = () => {
   ) : wallet.status === 'connected' ? (
     <Box sx={{ textAlign: 'center' }}>
       <Typography variant="h3" sx={{ mb: 3 }}>
-        Created Game
+        Joined Game
       </Typography>
       <Typography variant="h5" sx={{ mb: 2 }}>
         Game Contract: {addr}
