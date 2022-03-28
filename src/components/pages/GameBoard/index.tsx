@@ -52,6 +52,7 @@ const GameBoard: React.FC = () => {
         .replace(':player', player)
         .replace(':salt', salt.current.toString())
         .replace(':movement', movement.toString())
+        .replace(':timestamp', new Date().getTime().toString())
       );
     } else {
       alert('Failed to create game. Please try again considering options carefully');

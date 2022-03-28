@@ -8,7 +8,7 @@ const ROUTES = {
     component: GameBoard,
   },
   created: {
-    path: '/created-game/:addr/:player/:salt/:movement',
+    path: '/created-game/:addr/:player/:salt/:movement/:timestamp',
     component: CreatedGame,
   },
   joined: {

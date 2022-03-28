@@ -1,21 +1,32 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 import { useWallet } from 'use-wallet';
-import { checkPlayerReacted, checkWinningStatus, solve } from 'utils/web3-helpers';
+import { checkPlayerReacted, checkWinningStatus, player2Timeout, solve } from 'utils/web3-helpers';
+import ROUTES from 'config/routes';
 
 const CreatedGame: React.FC = () => {
   const wallet = useWallet();
-  const { addr, player, salt, movement } = useParams();
+  const navigate = useNavigate();
+
+  const { addr, player, salt, movement, timestamp } = useParams();
   const [playerConfirmed, setPlayerConfirmed] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [result, setResult] = useState<string>('');
+  const [intervalId, setIntervalId] = useState<number>(0);
+  const [player2Timeouted, setPlayer2Timeouted] = useState<boolean>(false);
 
   const handleTimer = useCallback(async () => {
+    if (timestamp === 'timeouted') {
+      setResult('You are refunded');
+      clearInterval(intervalId);
+      setIntervalId(0);
+    }
+
     const confirmed = await checkPlayerReacted({ wallet, gameContractAddr: addr as string });
 
     if (parseInt(confirmed)) {
@@ -31,8 +42,35 @@ const CreatedGame: React.FC = () => {
       } else {
         setResult(winningStatus ? 'Congratulations!!! You are winner!' : 'Sorry...you are defeated!');
       }
+    } else if (!player2Timeouted) {
+      const currentTime = new Date().getTime();
+      const delta = (currentTime - parseInt(timestamp as string)) / 1000 / 60 // to minutes;
+
+      if (delta > 5) {
+        setResult('Your player seems to be not available. You will get refunded soon.');
+        clearInterval(intervalId);
+        setIntervalId(0);
+        setPlayer2Timeouted(true);
+        setLoading(true);
+
+        const timeouted = await player2Timeout({ wallet, gameContractAddr: addr as string });
+
+        if (timeouted) {
+          setResult('You are refunded');
+          setLoading(false);
+
+          navigate(ROUTES.created.path
+            .replace(':addr', addr as string)
+            .replace(':player', player as string)
+            .replace(':salt', salt as string)
+            .replace(':movement', movement as string)
+            .replace(':timestamp', 'timeouted')
+          );
+        }
+      }
     }
-  }, [wallet, addr]);
+    // eslint-disable-next-line
+  }, [wallet, addr, salt, movement, timestamp, player2Timeouted]);
 
   const handleSolve = async () => {
     setLoading(true);
@@ -49,12 +87,20 @@ const CreatedGame: React.FC = () => {
     } else {
       setResult(win ? 'Congratulations!!! You are winner!' : 'Sorry...you are defeated!');
     }
+
+    clearInterval(intervalId);
+    setIntervalId(0);
   };
 
   useEffect(() => {
     if (wallet.status === 'connected') {
-      const intervalId = setInterval(handleTimer, 1000);
-      return () => clearInterval(intervalId);
+      const id = setInterval(handleTimer, 1000);
+      setIntervalId(id as any);
+
+      return () => {
+        clearInterval(id);
+        setIntervalId(0);
+      };
     }
   }, [wallet, handleTimer]);
 
