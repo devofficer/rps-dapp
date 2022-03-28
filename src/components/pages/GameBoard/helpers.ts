@@ -20,7 +20,13 @@ export const createGameContract = async ({ wallet, staking, params }: {
   const estimatedGas = await deployment.estimateGas();
   const gasPrice = await web3.eth.getGasPrice();
 
-  return await deployment.send({ from, gas: estimatedGas, gasPrice, value });
+  try {
+    const contract = await deployment.send({ from, gas: estimatedGas, gasPrice, value });
+    return contract.options.address;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 };
 
 export const getCommitment = async ({ wallet, movement, salt }: {
