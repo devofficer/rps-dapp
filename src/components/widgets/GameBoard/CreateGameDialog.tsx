@@ -37,7 +37,7 @@ const CreateGameDialog: React.FC<CreateGameDialogProps> = ({ open, onClose, onCr
           <Grid item xs={12}>
             <TextField
               fullWidth
-              label="Anohter Player Address"
+              label="Another Player Address"
               placeholder="Enter another player address"
               type="string"
               value={playerAddress}

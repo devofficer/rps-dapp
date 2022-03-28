@@ -25,12 +25,12 @@ const GameBoard: React.FC = () => {
   };
 
   const handleCreateGame = async (event: React.MouseEvent<HTMLElement>) => {
-    commitment.current = await getCommitment(wallet, movement, salt.current);
+    commitment.current = await getCommitment({ wallet, movement, salt: salt.current });
     setCreateOpen(true);
   };
 
   const handleCreateConfirming = async (staking: string, player: string) => {
-    const gameContract = await createGameContract(wallet, parseFloat(staking), [commitment.current, player]);
+    const gameContract = await createGameContract({ wallet, staking, params: [commitment.current, player] });
     console.log(gameContract);
   };
 
