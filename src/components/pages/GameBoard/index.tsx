@@ -14,6 +14,7 @@ import { RPS_MOVEMENTS, Move } from 'config/rps';
 import { createGameContract, getCommitment } from './helpers';
 import CreateGameDialog from './CreateGameDialog';
 import ROUTES from 'config/routes';
+import JoinGameDialog from './JoinGameDialog';
 
 const GameBoard: React.FC = () => {
   const wallet = useWallet();
@@ -21,7 +22,8 @@ const GameBoard: React.FC = () => {
 
   const [movement, setMovement] = useState<Move>(Move.Null);
   const [createOpen, setCreateOpen] = useState<boolean>(false);
-  const [creatingGame, setCreatingGame] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [joinOpen, setJoinOpen] = useState<boolean>(false);
 
   const salt = useRef(Math.floor(Math.random() * 10000));
   const commitment = useRef('');
@@ -33,16 +35,16 @@ const GameBoard: React.FC = () => {
     setMovement(newMovement);
   };
 
-  const handleCreateGame = async (event: React.MouseEvent<HTMLElement>) => {
+  const handleStartCreating = async (event: React.MouseEvent<HTMLElement>) => {
     commitment.current = await getCommitment({ wallet, movement, salt: salt.current });
     setCreateOpen(true);
   };
 
-  const handleCreatedGame = async (staking: string, player: string) => {
-    setCreatingGame(true);
+  const handleCreateGame = async (staking: string, player: string) => {
+    setLoading(true);
     const address = await createGameContract({ wallet, staking, params: [commitment.current, player] });
-    setCreatingGame(false);
-    
+    setLoading(false);
+
     if (address) {
       navigate(ROUTES.created.path.replace(':addr', address));
     } else {
@@ -50,7 +52,11 @@ const GameBoard: React.FC = () => {
     }
   };
 
-  const handleJoinGame = (event: React.MouseEvent<HTMLElement>) => {
+  const handleStartJoinning = (event: React.MouseEvent<HTMLElement>) => {
+    setJoinOpen(true);
+  };
+
+  const handleJoinGame = (contractAddr: string) => {
 
   };
 
@@ -85,7 +91,7 @@ const GameBoard: React.FC = () => {
         color="success"
         size="large"
         sx={{ mb: 4 }}
-        onClick={handleCreateGame}
+        onClick={handleStartCreating}
         disabled={movement === Move.Null}
       >
         Create Game
@@ -94,7 +100,7 @@ const GameBoard: React.FC = () => {
         variant="contained"
         color="warning"
         size="large"
-        onClick={handleJoinGame}
+        onClick={handleStartJoinning}
         disabled={movement === Move.Null}
       >
         Join Game
@@ -102,9 +108,14 @@ const GameBoard: React.FC = () => {
       <CreateGameDialog
         open={createOpen}
         onClose={() => setCreateOpen(false)}
-        onCreate={handleCreatedGame}
+        onCreate={handleCreateGame}
       />
-      <Backdrop open={creatingGame} sx={{ zIndex: 99999 }}>
+      <JoinGameDialog 
+        open={joinOpen}
+        onClose={() => setJoinOpen(false)}
+        onJoin={handleJoinGame}
+      />
+      <Backdrop open={loading} sx={{ zIndex: 99999 }}>
         <CircularProgress />
       </Backdrop>
     </Box>
