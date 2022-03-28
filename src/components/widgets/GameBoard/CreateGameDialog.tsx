@@ -24,7 +24,8 @@ const CreateGameDialog: React.FC<CreateGameDialogProps> = ({ open, onClose, onCr
     setCreating(true);
     await onCreate(stakingAmount, playerAddress);
     setCreating(false);
-  }
+  };
+  
   return (
     <Dialog open={open}>
       <DialogTitle>
