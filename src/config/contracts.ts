@@ -14,3 +14,4 @@ export const CONTRACT_DEPLOYMENT = {
 
 export const DEFAULT_GAS = 1500000;
 export const DEFAULT_GAS_PRICE = '30000000000';
+export const TIMEOUT = 5 * 1000 * 60; // 5 minutes

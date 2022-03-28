@@ -8,6 +8,7 @@ import Backdrop from '@mui/material/Backdrop';
 import { useWallet } from 'use-wallet';
 import { checkPlayerReacted, checkWinningStatus, player2Timeout, solve } from 'utils/web3-helpers';
 import ROUTES from 'config/routes';
+import { TIMEOUT } from 'config/contracts';
 
 const CreatedGame: React.FC = () => {
   const wallet = useWallet();
@@ -48,9 +49,9 @@ const CreatedGame: React.FC = () => {
       }
     } else if (!player2Timeouted) {
       const currentTime = new Date().getTime();
-      const delta = (currentTime - parseInt(timestamp as string)) / 1000 / 60 // to minutes;
+      const delta = currentTime - parseInt(timestamp as string);
 
-      if (delta > 5) {
+      if (delta > TIMEOUT) {
         setResult('Your player seems to be not available. You will get refunded soon.');
         clearInterval(intervalId);
         setIntervalId(0);
