@@ -5,12 +5,16 @@ import Typography from '@mui/material/Typography';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { useWallet } from 'use-wallet';
+import { useNavigate } from 'react-router-dom';
+
 import rps, { Move } from 'config/rps';
 import { createGameContract, getCommitment } from './helpers';
 import CreateGameDialog from './CreateGameDialog';
 
 const GameBoard: React.FC = () => {
   const wallet = useWallet();
+  const navigate = useNavigate();
+
   const [movement, setMovement] = useState<Move>(Move.Null);
   const [createOpen, setCreateOpen] = useState<boolean>(false);
 
