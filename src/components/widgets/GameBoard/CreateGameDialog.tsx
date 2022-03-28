@@ -6,6 +6,8 @@ import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Grid from '@mui/material/Grid';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 
 export type CreateGameDialogProps = {
   open: boolean;
@@ -16,7 +18,13 @@ export type CreateGameDialogProps = {
 const CreateGameDialog: React.FC<CreateGameDialogProps> = ({ open, onClose, onCreate }) => {
   const [stakingAmount, setStakingAmount] = useState<string>('');
   const [playerAddress, setPlayerAddress] = useState<string>('');
+  const [creating, setCreating] = useState<boolean>(false);
 
+  const handleCreate = async () => {
+    setCreating(true);
+    await onCreate(stakingAmount, playerAddress);
+    setCreating(false);
+  }
   return (
     <Dialog open={open}>
       <DialogTitle>
@@ -45,12 +53,15 @@ const CreateGameDialog: React.FC<CreateGameDialogProps> = ({ open, onClose, onCr
             />
           </Grid>
         </Grid>
+        <Backdrop open={creating}>
+          <CircularProgress color="inherit" />
+        </Backdrop>
       </DialogContent>
       <DialogActions>
         <Button variant="text" onClick={onClose}>
           Cancel
         </Button>
-        <Button variant="contained" color="primary" onClick={() => onCreate(stakingAmount, playerAddress)}>
+        <Button variant="contained" color="primary" onClick={handleCreate}>
           Create
         </Button>
       </DialogActions>
