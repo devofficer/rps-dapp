@@ -7,7 +7,7 @@ import Router from './Router';
 
 function App() {
   return (
-    <UseWalletProvider>
+    <UseWalletProvider autoConnect>
       <AppContainer>
         <AppBar />
         <AppContent>

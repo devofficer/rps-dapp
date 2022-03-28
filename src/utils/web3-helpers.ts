@@ -74,3 +74,54 @@ export const joinGame = async ({ wallet, gameContractAddr, movement }: {
     return false;
   }
 };
+
+export const checkPlayerReacted = async ({ wallet, gameContractAddr }: {
+  wallet: Wallet,
+  gameContractAddr: string,
+}) => {
+  const web3 = new Web3(wallet.ethereum);
+  const contract = new web3.eth.Contract(RPS_ABI as AbiItem[], gameContractAddr);
+  return await contract.methods.c2().call();
+};
+
+export const checkWinningStatus = async ({ wallet, gameContractAddr, salt, movement }: {
+  wallet: Wallet,
+  gameContractAddr: string,
+  salt: string,
+  movement: string,
+}) => {
+  const web3 = new Web3(wallet.ethereum);
+  const contract = new web3.eth.Contract(RPS_ABI as AbiItem[], gameContractAddr);
+  const c2 = await contract.methods.c2().call();
+  const stake = await contract.methods.stake().call();
+
+  if (stake === '0') {
+    return await contract.methods.win(movement, c2).call();
+  } else {
+    return null;
+  }
+};
+
+export const solve = async ({ wallet, gameContractAddr, salt, movement }: {
+  wallet: Wallet,
+  gameContractAddr: string,
+  salt: string,
+  movement: string,
+}) => {
+  const web3 = new Web3(wallet.ethereum);
+  const contract = new web3.eth.Contract(RPS_ABI as AbiItem[], gameContractAddr);
+
+  try {
+    await contract.methods.solve(movement, salt).send({
+      from: wallet.account as string,
+      gas: DEFAULT_GAS,
+      gasPrice: DEFAULT_GAS_PRICE,
+    });
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+
+  const c2 = await contract.methods.c2().call();
+  return await contract.methods.win(movement, c2).call();
+};

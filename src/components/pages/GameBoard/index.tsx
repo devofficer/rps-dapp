@@ -47,7 +47,12 @@ const GameBoard: React.FC = () => {
     setCreateOpen(false);
 
     if (address) {
-      navigate(ROUTES.created.path.replace(':addr', address));
+      navigate(ROUTES.created.path
+        .replace(':addr', address)
+        .replace(':player', player)
+        .replace(':salt', salt.current.toString())
+        .replace(':movement', movement.toString())
+      );
     } else {
       alert('Failed to create game. Please try again considering options carefully');
     }
@@ -70,15 +75,7 @@ const GameBoard: React.FC = () => {
     }
   };
 
-  if (wallet.status !== 'connected') {
-    return (
-      <Typography variant="h5">
-        Please connect your wallet
-      </Typography>
-    );
-  }
-
-  return (
+  return wallet.status === 'connected' ? (
     <Box display="flex" flexDirection="column" minWidth={300}>
       <Typography variant="h6">
         Please select movement for winning game
@@ -129,7 +126,11 @@ const GameBoard: React.FC = () => {
         <CircularProgress />
       </Backdrop>
     </Box>
-  )
+  ) : (
+    <Typography variant="h5">
+      Please connect your wallet
+    </Typography>
+  );
 };
 
 export default GameBoard;
