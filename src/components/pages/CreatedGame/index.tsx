@@ -14,7 +14,7 @@ const CreatedGame: React.FC = () => {
   const navigate = useNavigate();
 
   const { addr, player, salt, movement, timestamp } = useParams();
-  const [playerConfirmed, setPlayerConfirmed] = useState<boolean>(false);
+  const [player2Confirmed, setPlayer2Confirmed] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [result, setResult] = useState<string>('');
   const [intervalId, setIntervalId] = useState<number>(0);
@@ -27,20 +27,24 @@ const CreatedGame: React.FC = () => {
       setIntervalId(0);
     }
 
-    const confirmed = await checkPlayerReacted({ wallet, gameContractAddr: addr as string });
+    if (!player2Confirmed) {
+      const confirmed = await checkPlayerReacted({ wallet, gameContractAddr: addr as string });
 
-    if (parseInt(confirmed)) {
-      const winningStatus = await checkWinningStatus({
-        wallet,
-        gameContractAddr: addr as string,
-        salt: salt as string,
-        movement: movement as string
-      });
+      if (confirmed) {
+        const winningStatus = await checkWinningStatus({
+          wallet,
+          gameContractAddr: addr as string,
+          salt: salt as string,
+          movement: movement as string
+        });
 
-      if (winningStatus === null) {
-        setPlayerConfirmed(true);
-      } else {
-        setResult(winningStatus ? 'Congratulations!!! You are winner!' : 'Sorry...you are defeated!');
+        if (winningStatus === null) {
+          setPlayer2Confirmed(true);
+        } else {
+          setResult(winningStatus ? 'Congratulations!!! You are winner!' : 'Sorry...you are defeated!');
+          clearInterval(intervalId);
+          setIntervalId(0);
+        }
       }
     } else if (!player2Timeouted) {
       const currentTime = new Date().getTime();
@@ -104,53 +108,57 @@ const CreatedGame: React.FC = () => {
     }
   }, [wallet, handleTimer]);
 
-  return result ? (
-    <Typography variant="h3">
-      {result}
-    </Typography>
-  ) : wallet.status === 'connected' ? (
-    <Box sx={{ textAlign: 'center' }}>
-      <Typography variant="h3" sx={{ mb: 3 }}>
-        Created Game
-      </Typography>
-      <Typography variant="h5" sx={{ mb: 2 }}>
-        Game Contract: {addr}
-      </Typography>
-      <Typography variant="h5" sx={{ mb: 4 }}>
-        Player: {player}
-      </Typography>
-
-      <Box sx={{ position: 'relative' }}>
-        <Button
-          variant="contained"
-          disabled={!playerConfirmed}
-          color="primary"
-          sx={{ width: 200, height: 50 }}
-          onClick={handleSolve}
-        >
-          Solve
-        </Button>
-        {!playerConfirmed && (
-          <CircularProgress
-            size={24}
-            sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              marginTop: '-12px',
-              marginLeft: '-12px',
-            }}
-          />
-        )}
-      </Box>
+  return (
+    <>
       <Backdrop open={loading}>
         <CircularProgress />
       </Backdrop>
-    </Box>
-  ) : (
-    <Typography variant="h5">
-      Please connect your wallet
-    </Typography>
+      {result ? (
+        <Typography variant="h3" >
+          {result}
+        </Typography >
+      ) : wallet.status === 'connected' ? (
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography variant="h3" sx={{ mb: 3 }}>
+            Created Game
+          </Typography>
+          <Typography variant="h5" sx={{ mb: 2 }}>
+            Game Contract: {addr}
+          </Typography>
+          <Typography variant="h5" sx={{ mb: 4 }}>
+            Player: {player}
+          </Typography>
+
+          <Box sx={{ position: 'relative' }}>
+            <Button
+              variant="contained"
+              disabled={!player2Confirmed}
+              color="primary"
+              sx={{ width: 200, height: 50 }}
+              onClick={handleSolve}
+            >
+              Solve
+            </Button>
+            {!player2Confirmed && (
+              <CircularProgress
+                size={24}
+                sx={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  marginTop: '-12px',
+                  marginLeft: '-12px',
+                }}
+              />
+            )}
+          </Box>
+        </Box>
+      ) : (
+        <Typography variant="h5">
+          Please connect your wallet
+        </Typography>
+      )}
+    </>
   );
 };
 

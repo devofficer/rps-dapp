@@ -81,7 +81,18 @@ export const checkPlayerReacted = async ({ wallet, gameContractAddr }: {
 }) => {
   const web3 = new Web3(wallet.ethereum);
   const contract = new web3.eth.Contract(RPS_ABI as AbiItem[], gameContractAddr);
-  return await contract.methods.c2().call();
+  const c2 = await contract.methods.c2().call();
+  return parseInt(c2) > 0;
+};
+
+export const checkPlayer1Solved = async ({ wallet, gameContractAddr }: {
+  wallet: Wallet,
+  gameContractAddr: string,
+}) => {
+  const web3 = new Web3(wallet.ethereum);
+  const contract = new web3.eth.Contract(RPS_ABI as AbiItem[], gameContractAddr);
+  const stake = await contract.methods.stake().call();
+  return parseInt(stake) === 0;
 };
 
 export const checkWinningStatus = async ({ wallet, gameContractAddr, salt, movement }: {
