@@ -62,9 +62,9 @@ const GameBoard: React.FC = () => {
     const joined = await joinGame({ wallet, gameContractAddr, movement });
     setLoading(false);
     setJoinOpen(false);
-    
+
     if (joined) {
-      navigate(ROUTES.created.path.replace(':addr', gameContractAddr));
+      navigate(ROUTES.joined.path.replace(':addr', gameContractAddr));
     } else {
       alert('Failed to join game. Please try again considering options carefully');
     }
