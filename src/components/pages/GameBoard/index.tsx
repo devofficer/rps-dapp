@@ -11,7 +11,7 @@ import { useWallet } from 'use-wallet';
 import { useNavigate } from 'react-router-dom';
 
 import { RPS_MOVEMENTS, Move } from 'config/rps';
-import { joinGame, createGameContract, getCommitment } from './helpers';
+import { joinGame, createGameContract, getCommitment } from 'utils/web3-helpers';
 import CreateGameDialog from './CreateGameDialog';
 import ROUTES from 'config/routes';
 import JoinGameDialog from './JoinGameDialog';
