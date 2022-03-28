@@ -1,6 +1,12 @@
 import Web3 from 'web3';
 import { AbiItem, toWei } from 'web3-utils'
-import { CONTRACT_DEPLOYMENT, NETWORK, RPS_BIN } from 'config/contracts';
+import {
+  CONTRACT_DEPLOYMENT,
+  DEFAULT_GAS,
+  DEFAULT_GAS_PRICE,
+  NETWORK,
+  RPS_BIN
+} from 'config/contracts';
 import { Wallet } from 'use-wallet/dist/cjs/types';
 import { Move } from 'config/rps';
 import RPS_ABI from 'config/ABIs/rps-abi.json';
@@ -17,11 +23,14 @@ export const createGameContract = async ({ wallet, staking, params }: {
 
   const deployment = new web3.eth.Contract(RPS_ABI as AbiItem[])
     .deploy({ data: RPS_BIN, arguments: params });
-  const estimatedGas = await deployment.estimateGas();
-  const gasPrice = await web3.eth.getGasPrice();
 
   try {
-    const contract = await deployment.send({ from, gas: estimatedGas, gasPrice, value });
+    const contract = await deployment.send({
+      from,
+      gas: DEFAULT_GAS,
+      gasPrice: DEFAULT_GAS_PRICE,
+      value
+    });
     return contract.options.address;
   } catch (err) {
     console.error(err);
@@ -35,6 +44,33 @@ export const getCommitment = async ({ wallet, movement, salt }: {
   salt: number
 }) => {
   const web3 = new Web3(wallet.ethereum);
-  const contract = new web3.eth.Contract(Hasher_ABI as AbiItem[], CONTRACT_DEPLOYMENT[NETWORK].Hasher);
+  const contract = new web3.eth.Contract(
+    Hasher_ABI as AbiItem[],
+    CONTRACT_DEPLOYMENT[NETWORK].Hasher
+  );
   return await contract.methods.hash(movement, salt).call();
+};
+
+export const joinGame = async ({ wallet, gameContractAddr, movement }: {
+  wallet: Wallet,
+  gameContractAddr: string,
+  movement: Move
+}) => {
+  const web3 = new Web3(wallet.ethereum);
+  const contract = new web3.eth.Contract(RPS_ABI as AbiItem[], gameContractAddr);
+  const stake = await contract.methods.stake().call();
+
+  try {
+    await contract.methods.play(movement).send({
+      value: stake,
+      from: wallet.account as string,
+      gas: DEFAULT_GAS,
+      gasPrice: DEFAULT_GAS_PRICE,
+    });
+
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
 };

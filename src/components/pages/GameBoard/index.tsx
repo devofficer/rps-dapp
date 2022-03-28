@@ -11,7 +11,7 @@ import { useWallet } from 'use-wallet';
 import { useNavigate } from 'react-router-dom';
 
 import { RPS_MOVEMENTS, Move } from 'config/rps';
-import { createGameContract, getCommitment } from './helpers';
+import { joinGame, createGameContract, getCommitment } from './helpers';
 import CreateGameDialog from './CreateGameDialog';
 import ROUTES from 'config/routes';
 import JoinGameDialog from './JoinGameDialog';
@@ -44,6 +44,7 @@ const GameBoard: React.FC = () => {
     setLoading(true);
     const address = await createGameContract({ wallet, staking, params: [commitment.current, player] });
     setLoading(false);
+    setCreateOpen(false);
 
     if (address) {
       navigate(ROUTES.created.path.replace(':addr', address));
@@ -56,8 +57,17 @@ const GameBoard: React.FC = () => {
     setJoinOpen(true);
   };
 
-  const handleJoinGame = (contractAddr: string) => {
-
+  const handleJoinGame = async (gameContractAddr: string) => {
+    setLoading(true);
+    const joined = await joinGame({ wallet, gameContractAddr, movement });
+    setLoading(false);
+    setJoinOpen(false);
+    
+    if (joined) {
+      navigate(ROUTES.created.path.replace(':addr', gameContractAddr));
+    } else {
+      alert('Failed to join game. Please try again considering options carefully');
+    }
   };
 
   if (wallet.status !== 'connected') {
@@ -110,7 +120,7 @@ const GameBoard: React.FC = () => {
         onClose={() => setCreateOpen(false)}
         onCreate={handleCreateGame}
       />
-      <JoinGameDialog 
+      <JoinGameDialog
         open={joinOpen}
         onClose={() => setJoinOpen(false)}
         onJoin={handleJoinGame}
