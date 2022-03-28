@@ -4,12 +4,16 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
+
 import { useWallet } from 'use-wallet';
 import { useNavigate } from 'react-router-dom';
 
-import rps, { Move } from 'config/rps';
+import { RPS_MOVEMENTS, Move } from 'config/rps';
 import { createGameContract, getCommitment } from './helpers';
 import CreateGameDialog from './CreateGameDialog';
+import ROUTES from 'config/routes';
 
 const GameBoard: React.FC = () => {
   const wallet = useWallet();
@@ -17,6 +21,7 @@ const GameBoard: React.FC = () => {
 
   const [movement, setMovement] = useState<Move>(Move.Null);
   const [createOpen, setCreateOpen] = useState<boolean>(false);
+  const [creatingGame, setCreatingGame] = useState<boolean>(false);
 
   const salt = useRef(Math.floor(Math.random() * 10000));
   const commitment = useRef('');
@@ -33,9 +38,16 @@ const GameBoard: React.FC = () => {
     setCreateOpen(true);
   };
 
-  const handleCreateConfirming = async (staking: string, player: string) => {
-    const gameContract = await createGameContract({ wallet, staking, params: [commitment.current, player] });
-    console.log(gameContract);
+  const handleCreatedGame = async (staking: string, player: string) => {
+    setCreatingGame(true);
+    const address = await createGameContract({ wallet, staking, params: [commitment.current, player] });
+    setCreatingGame(false);
+    
+    if (address) {
+      navigate(ROUTES.created.path.replace(':addr', address));
+    } else {
+      alert('Failed to create game. Please try again considering options carefully');
+    }
   };
 
   const handleJoinGame = (event: React.MouseEvent<HTMLElement>) => {
@@ -62,7 +74,7 @@ const GameBoard: React.FC = () => {
         exclusive
         color="primary"
       >
-        {rps.map((action) => (
+        {RPS_MOVEMENTS.map((action) => (
           <ToggleButton key={action.move} value={action.move}>
             {action.name}
           </ToggleButton>
@@ -90,8 +102,11 @@ const GameBoard: React.FC = () => {
       <CreateGameDialog
         open={createOpen}
         onClose={() => setCreateOpen(false)}
-        onCreate={handleCreateConfirming}
+        onCreate={handleCreatedGame}
       />
+      <Backdrop open={creatingGame} sx={{ zIndex: 99999 }}>
+        <CircularProgress />
+      </Backdrop>
     </Box>
   )
 };
