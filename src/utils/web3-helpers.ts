@@ -102,6 +102,44 @@ export const checkWinningStatus = async ({ wallet, gameContractAddr, salt, movem
   }
 };
 
+export const player1Timeout = async ({ wallet, gameContractAddr }: {
+  wallet: Wallet,
+  gameContractAddr: string,
+}) => {
+  const web3 = new Web3(wallet.ethereum);
+  const contract = new web3.eth.Contract(RPS_ABI as AbiItem[], gameContractAddr);
+  
+  try {
+    await contract.methods.j1Timeout().send({
+      from: wallet.account as string,
+      gas: DEFAULT_GAS,
+      gasPrice: DEFAULT_GAS_PRICE,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export const player2Timeout = async ({ wallet, gameContractAddr }: {
+  wallet: Wallet,
+  gameContractAddr: string,
+}) => {
+  const web3 = new Web3(wallet.ethereum);
+  const contract = new web3.eth.Contract(RPS_ABI as AbiItem[], gameContractAddr);
+  
+  try {
+    await contract.methods.j2Timeout().send({
+      from: wallet.account as string,
+      gas: DEFAULT_GAS,
+      gasPrice: DEFAULT_GAS_PRICE,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export const solve = async ({ wallet, gameContractAddr, salt, movement }: {
   wallet: Wallet,
   gameContractAddr: string,
