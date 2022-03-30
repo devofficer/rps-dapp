@@ -186,3 +186,12 @@ export const getGameContractData = async ({ wallet, gameContractAddr }: {
 
   return { player1, player2 };
 };
+
+export const getStake = async ({ wallet, gameContractAddr }: {
+  wallet: Wallet,
+  gameContractAddr: string,
+}) => {
+  const web3 = new Web3(wallet.ethereum);
+  const contract = new web3.eth.Contract(RPS_ABI as AbiItem[], gameContractAddr);
+  return await contract.methods.stake().call();
+};
