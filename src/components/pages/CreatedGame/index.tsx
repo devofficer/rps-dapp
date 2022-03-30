@@ -20,8 +20,8 @@ const CreatedGame: React.FC = () => {
     (async () => {
       if (wallet.status === 'connected') {
         const { player2 } = await getGameContractData({ wallet, gameContractAddr: addr as string });
-        const salt = localStorage.getItem('salt') as string;
-        const movement = localStorage.getItem('movement') as string;
+        const salt = localStorage.getItem(`${addr}_salt`) as string;
+        const movement = localStorage.getItem(`${addr}_movement`) as string;
         setGameInfo({ salt, movement, player2 });
       }
     })();

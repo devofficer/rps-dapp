@@ -48,9 +48,9 @@ const GameBoard: React.FC = () => {
 
     if (address) {
       const timestamp = new Date().getTime().toString();
-      localStorage.setItem('salt', salt.current.toString());
-      localStorage.setItem('movement', movement.toString());
-      
+      localStorage.setItem(`${address}_salt`, salt.current.toString());
+      localStorage.setItem(`${address}_movement`, movement.toString());
+
       navigate(ROUTES.created.path
         .replace(':addr', address)
         .replace(':timestamp', timestamp)
