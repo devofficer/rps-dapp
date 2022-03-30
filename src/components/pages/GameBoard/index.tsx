@@ -7,6 +7,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import { useWallet } from 'use-wallet';
 import { useNavigate } from 'react-router-dom';
+import { Entropy, charset16 } from 'entropy-string';
 
 import { Move } from 'config/rps';
 import { createGameContract, getCommitment } from 'utils/web3-helpers';
@@ -22,7 +23,7 @@ const GameBoard: React.FC = () => {
   const [createOpen, setCreateOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const salt = useRef(Math.floor(Math.random() * 10000));
+  const salt = useRef(`0x${new Entropy({ charset: charset16, bits: 256 }).string()}`);
   const commitment = useRef('');
 
   const handleMovementChange = (

@@ -37,7 +37,7 @@ export const createGameContract = async ({ wallet, staking, params }: {
 export const getCommitment = async ({ wallet, movement, salt }: {
   wallet: Wallet,
   movement: Move,
-  salt: number
+  salt: string
 }) => {
   const web3 = new Web3(wallet.ethereum);
   const contract = new web3.eth.Contract(
