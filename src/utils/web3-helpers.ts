@@ -27,8 +27,6 @@ export const createGameContract = async ({ wallet, staking, params }: {
   try {
     const contract = await deployment.send({
       from,
-      gas: DEFAULT_GAS,
-      gasPrice: DEFAULT_GAS_PRICE,
       value
     });
     return contract.options.address;
@@ -64,8 +62,6 @@ export const joinGame = async ({ wallet, gameContractAddr, movement }: {
     await contract.methods.play(movement).send({
       value: stake,
       from: wallet.account as string,
-      gas: DEFAULT_GAS,
-      gasPrice: DEFAULT_GAS_PRICE,
     });
 
     return true;
@@ -123,8 +119,6 @@ export const player1Timeout = async ({ wallet, gameContractAddr }: {
   try {
     await contract.methods.j1Timeout().send({
       from: wallet.account as string,
-      gas: DEFAULT_GAS,
-      gasPrice: DEFAULT_GAS_PRICE,
     });
     return true;
   } catch {
@@ -142,8 +136,6 @@ export const player2Timeout = async ({ wallet, gameContractAddr }: {
   try {
     await contract.methods.j2Timeout().send({
       from: wallet.account as string,
-      gas: DEFAULT_GAS,
-      gasPrice: DEFAULT_GAS_PRICE,
     });
     return true;
   } catch {
@@ -163,8 +155,6 @@ export const solve = async ({ wallet, gameContractAddr, salt, movement }: {
   try {
     await contract.methods.solve(movement, salt).send({
       from: wallet.account as string,
-      gas: DEFAULT_GAS,
-      gasPrice: DEFAULT_GAS_PRICE,
     });
   } catch (err) {
     console.error(err);
