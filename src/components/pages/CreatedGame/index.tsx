@@ -51,6 +51,8 @@ const CreatedGame: React.FC = () => {
     setGameOverStatus(status);
     clearInterval(intervalId);
     setIntervalId(0);
+    localStorage.removeItem(`${gameContractAddr}_salt`);
+    localStorage.removeItem(`${gameContractAddr}_movement`);
   };
 
   const handleTimer = useCallback(async () => {

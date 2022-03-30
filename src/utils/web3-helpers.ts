@@ -2,8 +2,6 @@ import Web3 from 'web3';
 import { AbiItem, toWei } from 'web3-utils'
 import {
   CONTRACT_DEPLOYMENT,
-  DEFAULT_GAS,
-  DEFAULT_GAS_PRICE,
   NETWORK,
   RPS_BIN
 } from 'config/contracts';
