@@ -131,7 +131,7 @@ const CreatedGame: React.FC = () => {
 
   return (
     <>
-      <Backdrop open={loading}>
+      <Backdrop open={loading} sx={{ zIndex: 999999 }}>
         <CircularProgress />
       </Backdrop>
       {gameOverStatus ? (
