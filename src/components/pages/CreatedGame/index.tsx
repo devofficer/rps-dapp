@@ -1,32 +1,37 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
+import Link from '@mui/material/Link';
+
 import { useWallet } from 'use-wallet';
 import { checkPlayerReacted, checkWinningStatus, getGameContractData, getStake, player2Timeout, solve } from 'utils/web3-helpers';
 import { TIMEOUT } from 'config/contracts';
 import { GameOverStatus, GAME_OVER_MESSAGES } from 'config/rps';
+import ROUTES from 'config/routes';
 
 const CreatedGame: React.FC = () => {
   const wallet = useWallet();
 
   const { addr, timestamp } = useParams();
+  const gameContractAddr = addr as string;
 
   useEffect(() => {
     (async () => {
       if (wallet.status === 'connected') {
-        const { player2 } = await getGameContractData({ wallet, gameContractAddr: addr as string });
-        const salt = localStorage.getItem(`${addr}_salt`) as string;
-        const movement = localStorage.getItem(`${addr}_movement`) as string;
+        const { player2 } = await getGameContractData({ wallet, gameContractAddr });
+        const salt = localStorage.getItem(`${gameContractAddr}_salt`) as string;
+        const movement = localStorage.getItem(`${gameContractAddr}_movement`) as string;
         setGameInfo({ salt, movement, player2 });
       }
     })();
-  }, [wallet, addr]);
+  }, [wallet, gameContractAddr]);
 
-  const [{ salt, movement, player2 }, setGameInfo] = useState<{
+  const [{ salt, movement }, setGameInfo] = useState<{
     salt: string,
     movement: string,
     player2: string
@@ -51,12 +56,12 @@ const CreatedGame: React.FC = () => {
   const handleTimer = useCallback(async () => {
 
     if (!player2Confirmed) {
-      const confirmed = await checkPlayerReacted({ wallet, gameContractAddr: addr as string });
+      const confirmed = await checkPlayerReacted({ wallet, gameContractAddr });
 
       if (confirmed) {
         const winningStatus = await checkWinningStatus({
           wallet,
-          gameContractAddr: addr as string,
+          gameContractAddr,
           salt: salt,
           movement: movement
         });
@@ -74,7 +79,7 @@ const CreatedGame: React.FC = () => {
       const delta = currentTime - parseInt(timestamp as string);
 
       if (delta > TIMEOUT) {
-        const stake = await getStake({ wallet, gameContractAddr: addr as string });
+        const stake = await getStake({ wallet, gameContractAddr });
         setPlayer2Timeouted(true);
 
         if (stake === '0') {
@@ -83,7 +88,7 @@ const CreatedGame: React.FC = () => {
           gameOver(GameOverStatus.Timeouted);
           setLoading(true);
 
-          const timeouted = await player2Timeout({ wallet, gameContractAddr: addr as string });
+          const timeouted = await player2Timeout({ wallet, gameContractAddr });
 
           if (timeouted) {
             gameOver(GameOverStatus.Refunded);
@@ -93,13 +98,13 @@ const CreatedGame: React.FC = () => {
       }
     }
     // eslint-disable-next-line
-  }, [wallet, addr, salt, movement, timestamp, player2Timeouted]);
+  }, [wallet, gameContractAddr, salt, movement, timestamp, player2Timeouted]);
 
   const handleSolve = async () => {
     setLoading(true);
     const win = await solve({
       wallet,
-      gameContractAddr: addr as string,
+      gameContractAddr,
       salt: salt,
       movement: movement
     });
@@ -138,11 +143,13 @@ const CreatedGame: React.FC = () => {
           <Typography variant="h3" sx={{ mb: 3 }}>
             Created Game
           </Typography>
-          <Typography variant="h5" sx={{ mb: 2 }}>
-            Game Contract: {addr}
+          <Typography variant="h5" sx={{ mb: 1 }}>
+            Game link for other player to join
           </Typography>
-          <Typography variant="h5" sx={{ mb: 4 }}>
-            Player: {player2}
+          <Typography variant="h5" sx={{ mb: 5 }}>
+            <Link href={ROUTES.join.path.replace(':addr', gameContractAddr)} target="_blank">
+              {`${window.location.host}${ROUTES.join.path.replace(':addr', gameContractAddr)}`}
+            </Link>
           </Typography>
 
           <Box sx={{ position: 'relative' }}>
