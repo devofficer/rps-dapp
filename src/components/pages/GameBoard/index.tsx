@@ -9,10 +9,9 @@ import { useWallet } from 'use-wallet';
 import { useNavigate } from 'react-router-dom';
 
 import { Move } from 'config/rps';
-import { joinGame, createGameContract, getCommitment } from 'utils/web3-helpers';
+import { createGameContract, getCommitment } from 'utils/web3-helpers';
 import CreateGameDialog from './CreateGameDialog';
 import ROUTES from 'config/routes';
-import JoinGameDialog from './JoinGameDialog';
 import MoveSelector from 'components/widgets/MoveSelector';
 
 const GameBoard: React.FC = () => {
@@ -22,7 +21,6 @@ const GameBoard: React.FC = () => {
   const [movement, setMovement] = useState<Move>(Move.Null);
   const [createOpen, setCreateOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [joinOpen, setJoinOpen] = useState<boolean>(false);
 
   const salt = useRef(Math.floor(Math.random() * 10000));
   const commitment = useRef('');
@@ -59,23 +57,6 @@ const GameBoard: React.FC = () => {
     }
   };
 
-  const handleStartJoinning = (event: React.MouseEvent<HTMLElement>) => {
-    setJoinOpen(true);
-  };
-
-  const handleJoinGame = async (gameContractAddr: string) => {
-    setLoading(true);
-    const joined = await joinGame({ wallet, gameContractAddr, movement });
-    setLoading(false);
-    setJoinOpen(false);
-
-    if (joined) {
-      navigate(ROUTES.joined.path.replace(':addr', gameContractAddr));
-    } else {
-      alert('Failed to join game. Please try again considering options carefully');
-    }
-  };
-
   return wallet.status === 'connected' ? (
     <Box display="flex" flexDirection="column" minWidth={300}>
       <Typography variant="h6">
@@ -92,24 +73,10 @@ const GameBoard: React.FC = () => {
       >
         Create Game
       </Button>
-      <Button
-        variant="contained"
-        color="warning"
-        size="large"
-        onClick={handleStartJoinning}
-        disabled={movement === Move.Null}
-      >
-        Join Game
-      </Button>
       <CreateGameDialog
         open={createOpen}
         onClose={() => setCreateOpen(false)}
         onCreate={handleCreateGame}
-      />
-      <JoinGameDialog
-        open={joinOpen}
-        onClose={() => setJoinOpen(false)}
-        onJoin={handleJoinGame}
       />
       <Backdrop open={loading} sx={{ zIndex: 99999 }}>
         <CircularProgress />
