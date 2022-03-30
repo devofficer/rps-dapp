@@ -6,7 +6,7 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 import { useWallet } from 'use-wallet';
-import { checkPlayerReacted, checkWinningStatus, player2Timeout, solve } from 'utils/web3-helpers';
+import { checkPlayerReacted, checkWinningStatus, getGameContractData, player2Timeout, solve } from 'utils/web3-helpers';
 import ROUTES from 'config/routes';
 import { TIMEOUT } from 'config/contracts';
 
@@ -14,7 +14,28 @@ const CreatedGame: React.FC = () => {
   const wallet = useWallet();
   const navigate = useNavigate();
 
-  const { addr, player, salt, movement, timestamp } = useParams();
+  const { addr, timestamp } = useParams();
+
+  useEffect(() => {
+    (async () => {
+      if (wallet.status === 'connected') {
+        const { player2 } = await getGameContractData({ wallet, gameContractAddr: addr as string });
+        const salt = localStorage.getItem('salt') as string;
+        const movement = localStorage.getItem('movement') as string;
+        setGameInfo({ salt, movement, player2 });
+      }
+    })();
+  }, [wallet, addr]);
+
+  const [{ salt, movement, player2 }, setGameInfo] = useState<{
+    salt: string,
+    movement: string,
+    player2: string
+  }>({
+    salt: '',
+    movement: '',
+    player2: ''
+  });
   const [player2Confirmed, setPlayer2Confirmed] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [result, setResult] = useState<string>('');
@@ -35,8 +56,8 @@ const CreatedGame: React.FC = () => {
         const winningStatus = await checkWinningStatus({
           wallet,
           gameContractAddr: addr as string,
-          salt: salt as string,
-          movement: movement as string
+          salt: salt,
+          movement: movement
         });
 
         if (winningStatus === null) {
@@ -66,9 +87,6 @@ const CreatedGame: React.FC = () => {
 
           navigate(ROUTES.created.path
             .replace(':addr', addr as string)
-            .replace(':player', player as string)
-            .replace(':salt', salt as string)
-            .replace(':movement', movement as string)
             .replace(':timestamp', 'timeouted')
           );
         }
@@ -82,8 +100,8 @@ const CreatedGame: React.FC = () => {
     const win = await solve({
       wallet,
       gameContractAddr: addr as string,
-      salt: salt as string,
-      movement: movement as string
+      salt: salt,
+      movement: movement
     });
     setLoading(false);
 
@@ -127,7 +145,7 @@ const CreatedGame: React.FC = () => {
             Game Contract: {addr}
           </Typography>
           <Typography variant="h5" sx={{ mb: 4 }}>
-            Player: {player}
+            Player: {player2}
           </Typography>
 
           <Box sx={{ position: 'relative' }}>

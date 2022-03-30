@@ -119,7 +119,7 @@ export const player1Timeout = async ({ wallet, gameContractAddr }: {
 }) => {
   const web3 = new Web3(wallet.ethereum);
   const contract = new web3.eth.Contract(RPS_ABI as AbiItem[], gameContractAddr);
-  
+
   try {
     await contract.methods.j1Timeout().send({
       from: wallet.account as string,
@@ -138,7 +138,7 @@ export const player2Timeout = async ({ wallet, gameContractAddr }: {
 }) => {
   const web3 = new Web3(wallet.ethereum);
   const contract = new web3.eth.Contract(RPS_ABI as AbiItem[], gameContractAddr);
-  
+
   try {
     await contract.methods.j2Timeout().send({
       from: wallet.account as string,
@@ -173,4 +173,16 @@ export const solve = async ({ wallet, gameContractAddr, salt, movement }: {
 
   const c2 = await contract.methods.c2().call();
   return await contract.methods.win(movement, c2).call();
+};
+
+export const getGameContractData = async ({ wallet, gameContractAddr }: {
+  wallet: Wallet,
+  gameContractAddr: string,
+}) => {
+  const web3 = new Web3(wallet.ethereum);
+  const contract = new web3.eth.Contract(RPS_ABI as AbiItem[], gameContractAddr);
+  const player1 = await contract.methods.j1().call();
+  const player2 = await contract.methods.j2().call();
+
+  return { player1, player2 };
 };

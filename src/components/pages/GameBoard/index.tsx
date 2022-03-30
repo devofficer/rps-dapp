@@ -47,12 +47,13 @@ const GameBoard: React.FC = () => {
     setCreateOpen(false);
 
     if (address) {
+      const timestamp = new Date().getTime().toString();
+      localStorage.setItem('salt', salt.current.toString());
+      localStorage.setItem('movement', movement.toString());
+      
       navigate(ROUTES.created.path
         .replace(':addr', address)
-        .replace(':player', player)
-        .replace(':salt', salt.current.toString())
-        .replace(':movement', movement.toString())
-        .replace(':timestamp', new Date().getTime().toString())
+        .replace(':timestamp', timestamp)
       );
     } else {
       alert('Failed to create game. Please try again considering options carefully');
