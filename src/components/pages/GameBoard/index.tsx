@@ -2,19 +2,18 @@ import React, { useRef, useState } from 'react';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { useWallet } from 'use-wallet';
 import { useNavigate } from 'react-router-dom';
 
-import { RPS_MOVEMENTS, Move } from 'config/rps';
+import { Move } from 'config/rps';
 import { joinGame, createGameContract, getCommitment } from 'utils/web3-helpers';
 import CreateGameDialog from './CreateGameDialog';
 import ROUTES from 'config/routes';
 import JoinGameDialog from './JoinGameDialog';
+import MoveSelector from 'components/widgets/MoveSelector';
 
 const GameBoard: React.FC = () => {
   const wallet = useWallet();
@@ -82,19 +81,7 @@ const GameBoard: React.FC = () => {
       <Typography variant="h6">
         Please select movement for winning game
       </Typography>
-      <ToggleButtonGroup
-        sx={{ mb: 4 }}
-        value={movement}
-        onChange={handleMovementChange}
-        exclusive
-        color="primary"
-      >
-        {RPS_MOVEMENTS.map((action) => (
-          <ToggleButton key={action.move} value={action.move}>
-            {action.name}
-          </ToggleButton>
-        ))}
-      </ToggleButtonGroup>
+      <MoveSelector value={movement} onChange={handleMovementChange} />
       <Button
         variant="contained"
         color="success"
