@@ -17,28 +17,30 @@ import ROUTES from 'config/routes';
 const CreatedGame: React.FC = () => {
   const wallet = useWallet();
 
-  const { addr, timestamp } = useParams();
+  const { addr } = useParams();
   const gameContractAddr = addr as string;
 
   useEffect(() => {
     (async () => {
       if (wallet.status === 'connected') {
-        const { player2 } = await getGameContractData({ wallet, gameContractAddr });
+        const { player2, lastAction } = await getGameContractData({ wallet, gameContractAddr });
         const salt = localStorage.getItem(`${gameContractAddr}_salt`) as string;
         const movement = localStorage.getItem(`${gameContractAddr}_movement`) as string;
-        setGameInfo({ salt, movement, player2 });
+        setGameInfo({ salt, movement, player2, lastAction: parseInt(lastAction) });
       }
     })();
   }, [wallet, gameContractAddr]);
 
-  const [{ salt, movement }, setGameInfo] = useState<{
+  const [{ salt, movement, lastAction }, setGameInfo] = useState<{
     salt: string,
     movement: string,
-    player2: string
+    player2: string,
+    lastAction: number,
   }>({
     salt: '',
     movement: '',
-    player2: ''
+    player2: '',
+    lastAction: 0,
   });
 
   const [player2Confirmed, setPlayer2Confirmed] = useState<boolean>(false);
@@ -76,9 +78,9 @@ const CreatedGame: React.FC = () => {
       }
     }
 
-    if (!player2Timeouted) {
+    if (!player2Timeouted && lastAction) {
       const currentTime = new Date().getTime();
-      const delta = currentTime - parseInt(timestamp as string);
+      const delta = currentTime - lastAction;
 
       if (delta > TIMEOUT) {
         const stake = await getStake({ wallet, gameContractAddr });
@@ -100,7 +102,7 @@ const CreatedGame: React.FC = () => {
       }
     }
     // eslint-disable-next-line
-  }, [wallet, gameContractAddr, salt, movement, timestamp, player2Timeouted]);
+  }, [wallet, gameContractAddr, salt, movement, lastAction, player2Timeouted]);
 
   const handleSolve = async () => {
     setLoading(true);

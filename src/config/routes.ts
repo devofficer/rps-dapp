@@ -13,7 +13,7 @@ const ROUTES = {
     component: JoinGame,
   },
   created: {
-    path: '/created-game/:addr/:timestamp',
+    path: '/created-game/:addr',
     component: CreatedGame,
   },
   joined: {

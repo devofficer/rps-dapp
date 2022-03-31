@@ -171,8 +171,9 @@ export const getGameContractData = async ({ wallet, gameContractAddr }: {
   const contract = new web3.eth.Contract(RPS_ABI as AbiItem[], gameContractAddr);
   const player1 = await contract.methods.j1().call();
   const player2 = await contract.methods.j2().call();
+  const lastAction = await contract.methods.lastAction().call();
 
-  return { player1, player2 };
+  return { player1, player2, lastAction };
 };
 
 export const getStake = async ({ wallet, gameContractAddr }: {
