@@ -1,9 +1,10 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
+import TextField from '@mui/material/TextField';
 
 import { useWallet } from 'use-wallet';
 import { useNavigate } from 'react-router-dom';
@@ -11,7 +12,6 @@ import { Entropy, charset16 } from 'entropy-string';
 
 import { Move } from 'config/rps';
 import { createGameContract, getCommitment } from 'utils/web3-helpers';
-import CreateGameDialog from './CreateGameDialog';
 import ROUTES from 'config/routes';
 import MoveSelector from 'components/widgets/MoveSelector';
 
@@ -20,11 +20,15 @@ const GameBoard: React.FC = () => {
   const navigate = useNavigate();
 
   const [movement, setMovement] = useState<Move>(Move.Null);
-  const [createOpen, setCreateOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [stakingAmount, setStakingAmount] = useState<string>('0');
+  const [player2Address, setPlayer2Address] = useState<string>('');
 
-  const salt = useRef(`0x${new Entropy({ charset: charset16, bits: 256 }).string()}`);
-  const commitment = useRef('');
+  useEffect(() => {
+    if (wallet.account) {
+      setPlayer2Address(wallet.account)
+    }
+  }, [wallet]);
 
   const handleMovementChange = (
     event: React.MouseEvent<HTMLElement>,
@@ -33,19 +37,15 @@ const GameBoard: React.FC = () => {
     setMovement(newMovement);
   };
 
-  const handleStartCreating = async (event: React.MouseEvent<HTMLElement>) => {
-    commitment.current = await getCommitment({ wallet, movement, salt: salt.current });
-    setCreateOpen(true);
-  };
-
-  const handleCreateGame = async (staking: string, player: string) => {
+  const handleCreateGame = async () => {
     setLoading(true);
-    const address = await createGameContract({ wallet, staking, params: [commitment.current, player] });
+    const salt = `0x${new Entropy({ charset: charset16, bits: 256 }).string()}`;
+    const commitment = await getCommitment({ wallet, movement, salt });
+    const address = await createGameContract({ wallet, staking: stakingAmount, params: [commitment, player2Address] });
     setLoading(false);
-    setCreateOpen(false);
 
     if (address) {
-      localStorage.setItem(`${address}_salt`, salt.current.toString());
+      localStorage.setItem(`${address}_salt`, salt);
       localStorage.setItem(`${address}_movement`, movement.toString());
 
       navigate(ROUTES.created.path.replace(':addr', address));
@@ -60,21 +60,34 @@ const GameBoard: React.FC = () => {
         Please select movement for winning game
       </Typography>
       <MoveSelector value={movement} onChange={handleMovementChange} />
+      <TextField
+        fullWidth
+        label="Staking amount"
+        placeholder="Enter the amount in ETH"
+        type="number"
+        value={stakingAmount}
+        onChange={e => setStakingAmount(e.target.value)}
+        sx={{ mb: 2 }}
+      />
+      <TextField
+        fullWidth
+        label="Another Player Address"
+        placeholder="Enter another player address"
+        type="string"
+        value={player2Address}
+        onChange={e => setPlayer2Address(e.target.value)}
+        sx={{ mb: 2 }}
+      />
       <Button
         variant="contained"
         color="success"
         size="large"
         sx={{ mb: 4 }}
-        onClick={handleStartCreating}
+        onClick={handleCreateGame}
         disabled={movement === Move.Null}
       >
         Create Game
       </Button>
-      <CreateGameDialog
-        open={createOpen}
-        onClose={() => setCreateOpen(false)}
-        onCreate={handleCreateGame}
-      />
       <Backdrop open={loading} sx={{ zIndex: 99999 }}>
         <CircularProgress />
       </Backdrop>

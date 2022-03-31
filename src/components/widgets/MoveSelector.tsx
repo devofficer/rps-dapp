@@ -11,7 +11,7 @@ export type MoveSelectorProps = {
 const MoveSelector: React.FC<MoveSelectorProps> = ({ value, onChange }) => {
   return (
     <ToggleButtonGroup
-      sx={{ mb: 4 }}
+      sx={{ mb: 2 }}
       value={value}
       onChange={onChange}
       exclusive
