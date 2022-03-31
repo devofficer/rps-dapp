@@ -43,10 +43,11 @@ const JoinGame: React.FC = () => {
 
   return wallet.status === 'connected' ? (
     <Box display="flex" flexDirection="column" minWidth={300}>
-      <Typography variant="h6">
-        Please select movement for winning game
-      </Typography>
-      <MoveSelector value={movement} onChange={handleMovementChange} />
+      <MoveSelector
+        label="Movement"
+        value={movement}
+        onChange={handleMovementChange}
+      />
       <Button
         variant="contained"
         color="warning"

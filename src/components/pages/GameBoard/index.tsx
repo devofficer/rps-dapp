@@ -55,11 +55,12 @@ const GameBoard: React.FC = () => {
   };
 
   return wallet.status === 'connected' ? (
-    <Box display="flex" flexDirection="column" minWidth={300}>
-      <Typography variant="h6">
-        Please select movement for winning game
-      </Typography>
-      <MoveSelector value={movement} onChange={handleMovementChange} />
+    <Box display="flex" flexDirection="column" minWidth={400}>
+      <MoveSelector
+        label="Movement"
+        value={movement}
+        onChange={handleMovementChange}
+      />
       <TextField
         fullWidth
         label="Staking amount"
@@ -84,7 +85,7 @@ const GameBoard: React.FC = () => {
         size="large"
         sx={{ mb: 4 }}
         onClick={handleCreateGame}
-        disabled={movement === Move.Null}
+        disabled={movement === Move.Null || parseFloat(stakingAmount) === 0}
       >
         Create Game
       </Button>

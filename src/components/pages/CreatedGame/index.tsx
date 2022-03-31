@@ -80,7 +80,7 @@ const CreatedGame: React.FC = () => {
 
     if (!player2Timeouted && lastAction) {
       const currentTime = new Date().getTime();
-      const delta = currentTime - lastAction;
+      const delta = currentTime - lastAction * 1000;
 
       if (delta > TIMEOUT) {
         const stake = await getStake({ wallet, gameContractAddr });
