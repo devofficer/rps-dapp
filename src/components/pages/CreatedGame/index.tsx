@@ -53,12 +53,9 @@ const CreatedGame: React.FC = () => {
     setGameOverStatus(status);
     clearInterval(intervalId);
     setIntervalId(0);
-    localStorage.removeItem(`${gameContractAddr}_salt`);
-    localStorage.removeItem(`${gameContractAddr}_movement`);
   };
 
   const handleTimer = useCallback(async () => {
-
     if (!player2Confirmed) {
       const confirmed = await checkPlayerReacted({ wallet, gameContractAddr });
 
@@ -69,7 +66,6 @@ const CreatedGame: React.FC = () => {
           salt: salt,
           movement: movement
         });
-
         if (winningStatus === null) {
           setPlayer2Confirmed(true);
         } else {

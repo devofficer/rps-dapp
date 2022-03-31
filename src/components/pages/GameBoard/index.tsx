@@ -77,7 +77,7 @@ const GameBoard: React.FC = () => {
         type="string"
         value={player2Address}
         onChange={e => setPlayer2Address(e.target.value)}
-        sx={{ mb: 2 }}
+        sx={{ mb: 4 }}
       />
       <Button
         variant="contained"

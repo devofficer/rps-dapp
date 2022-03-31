@@ -13,7 +13,7 @@ export type MoveSelectorProps = {
 const MoveSelector: React.FC<MoveSelectorProps> = ({ label, value, onChange }) => {
   return (
     <>
-      <Typography variant="h6">
+      <Typography variant="caption">
         {label}
       </Typography>
       <ToggleButtonGroup
@@ -22,6 +22,7 @@ const MoveSelector: React.FC<MoveSelectorProps> = ({ label, value, onChange }) =
         onChange={onChange}
         exclusive
         color="primary"
+        fullWidth
       >
         {RPS_MOVEMENTS.map((action) => (
           <ToggleButton key={action.move} value={action.move}>
