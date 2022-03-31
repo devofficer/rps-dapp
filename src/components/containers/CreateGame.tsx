@@ -15,7 +15,7 @@ import { createGameContract, getCommitment } from 'utils/web3-helpers';
 import ROUTES from 'config/routes';
 import MoveSelector from 'components/widgets/MoveSelector';
 
-const GameBoard: React.FC = () => {
+const CreateGame: React.FC = () => {
   const wallet = useWallet();
   const navigate = useNavigate();
 
@@ -100,4 +100,4 @@ const GameBoard: React.FC = () => {
   );
 };
 
-export default GameBoard;
+export default CreateGame;

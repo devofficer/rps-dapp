@@ -1,12 +1,12 @@
-import CreatedGame from "components/pages/CreatedGame";
-import GameBoard from "components/pages/GameBoard";
-import JoinedGame from "components/pages/JoinedGame";
-import JoinGame from "components/pages/JoinGame";
+import CreatedGame from "components/containers/CreatedGame";
+import CreateGame from "components/containers/CreateGame";
+import JoinedGame from "components/containers/JoinedGame";
+import JoinGame from "components/containers/JoinGame";
 
 const ROUTES = {
   home: {
     path: '/',
-    component: GameBoard,
+    component: CreateGame,
   },
   join: {
     path: '/join/:addr',
