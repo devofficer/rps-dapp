@@ -1,69 +1,72 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useWallet } from 'use-wallet';
+import { useParams } from 'react-router-dom';
 
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 
-import { checkPlayer1Solved, player1Timeout } from 'utils/web3-helpers';
-import ROUTES from 'config/routes';
+import { useWallet } from 'use-wallet';
+import { checkPlayer1Solved, getGameContractData, getStake, player1Timeout } from 'utils/web3-helpers';
 import { TIMEOUT } from 'config/contracts';
+import { GameOverStatus, GAME_OVER_MESSAGES } from 'config/rps';
 
 const JoinedGame: React.FC = () => {
   const wallet = useWallet();
-  const navigate = useNavigate();
 
-  const { addr, timestamp } = useParams();
-  const [player1Solved, setPlayer1Solved] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [result, setResult] = useState<string>('');
+  const { addr } = useParams();
+  const gameContractAddr = addr as string;
+
+  useEffect(() => {
+    (async () => {
+      if (wallet.status === 'connected') {
+        const { lastAction } = await getGameContractData({ wallet, gameContractAddr });
+        setLastAction(parseInt(lastAction) * 1000);
+      }
+    })();
+  }, [wallet, gameContractAddr]);
+
+  const [lastAction, setLastAction] = useState<number>(0);
+  const [gameOverStatus, setGameOverStatus] = useState<GameOverStatus>(GameOverStatus.Null);
   const [intervalId, setIntervalId] = useState<number>(0);
+  const [player1Solved, setPlayer1Solved] = useState<boolean>(false);
   const [player1Timeouted, setPlayer1Timeouted] = useState<boolean>(false);
 
-  const handleTimer = useCallback(async () => {
-    if (timestamp === 'timeouted') {
-      setResult('You are refunded');
-      clearInterval(intervalId);
-      setIntervalId(0);
-    }
+  const gameOver = (status: GameOverStatus) => {
+    setGameOverStatus(status);
+    clearInterval(intervalId);
+    setIntervalId(0);
+  };
 
+  const handleTimer = useCallback(async () => {
     if (!player1Solved) {
-      const solved = await checkPlayer1Solved({ wallet, gameContractAddr: addr as string });
+      const solved = await checkPlayer1Solved({ wallet, gameContractAddr });
 
       if (solved) {
-        setResult('Game Over');
-        clearInterval(intervalId);
-        setIntervalId(0);
+        gameOver(GameOverStatus.GameOver);
         setPlayer1Solved(true);
-        setLoading(false);
-      }
-    } else if (!player1Timeouted) {
-      const currentTime = new Date().getTime();
-      const delta = currentTime - parseInt(timestamp as string);
+      } else if (!player1Timeouted && lastAction) {
+        const currentTime = new Date().getTime();
+        const delta = currentTime - lastAction;
 
-      if (delta > TIMEOUT) {
-        setResult('Game creator seems to be not available. You will get refunded soon.');
-        clearInterval(intervalId);
-        setIntervalId(0);
-        setPlayer1Timeouted(true);
+        if (delta > TIMEOUT) {
+          const stake = await getStake({ wallet, gameContractAddr });
+          setPlayer1Timeouted(true);
 
-        const timeouted = await player1Timeout({ wallet, gameContractAddr: addr as string });
+          if (stake === '0') {
+            gameOver(GameOverStatus.Winned);
+          } else {
+            gameOver(GameOverStatus.Timeouted);
 
-        if (timeouted) {
-          setResult('You are refunded');
-          setLoading(false);
-
-          navigate(ROUTES.joined.path
-            .replace(':addr', addr as string)
-            .replace(':timestamp', 'timeouted')
-          );
+            if (await player1Timeout({ wallet, gameContractAddr })) {
+              gameOver(GameOverStatus.Winned);
+            }
+          }
         }
       }
     }
     // eslint-disable-next-line
-  }, [wallet, addr, timestamp, player1Timeouted]);
+  }, [wallet, gameContractAddr, lastAction, player1Timeouted]);
 
   useEffect(() => {
     if (wallet.status === 'connected') {
@@ -77,27 +80,30 @@ const JoinedGame: React.FC = () => {
     }
   }, [wallet, handleTimer]);
 
-  return result ? (
-    <Typography variant="h3">
-      {result}
-    </Typography>
-  ) : wallet.status === 'connected' ? (
-    <Box sx={{ textAlign: 'center' }}>
-      <Typography variant="h3" sx={{ mb: 3 }}>
-        Joined Game
-      </Typography>
-      <Typography variant="h5" sx={{ mb: 2 }}>
-        Game Contract: {addr}
-      </Typography>
-
-      <Backdrop open={loading}>
+  return (
+    <>
+      <Backdrop open={gameOverStatus !== GameOverStatus.GameOver} sx={{ zIndex: 999999 }}>
         <CircularProgress />
       </Backdrop>
-    </Box>
-  ) : (
-    <Typography variant="h5">
-      Please connect your wallet
-    </Typography>
+      {gameOverStatus ? (
+        <Typography variant="h3" >
+          {GAME_OVER_MESSAGES[gameOverStatus]}
+        </Typography >
+      ) : wallet.status === 'connected' ? (
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography variant="h3" sx={{ mb: 3 }}>
+            Joined Game
+          </Typography>
+          <Typography variant="h5" sx={{ mb: 1 }}>
+            Game Contract Address: {gameContractAddr}
+          </Typography>
+        </Box>
+      ) : (
+        <Typography variant="h5">
+          Please connect your wallet
+        </Typography>
+      )}
+    </>
   );
 };
 

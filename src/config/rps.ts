@@ -11,7 +11,7 @@ export const RPS_MOVEMENTS = [
 ];
 
 export enum GameOverStatus {
-  Null, Refunded, Winned, Defeated, Timeouted, Failed
+  Null, Refunded, Winned, Defeated, Timeouted, Failed, GameOver
 };
 
 export const GAME_OVER_MESSAGES = {
@@ -20,4 +20,5 @@ export const GAME_OVER_MESSAGES = {
   [GameOverStatus.Defeated]: 'Sorry... you are defeated!',
   [GameOverStatus.Timeouted]: 'Oops... your player is not available!',
   [GameOverStatus.Failed]: 'Oops...invalid parameters are detected!',
+  [GameOverStatus.GameOver]: 'Game Over',
 };

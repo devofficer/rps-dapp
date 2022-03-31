@@ -26,7 +26,7 @@ const CreatedGame: React.FC = () => {
         const { player2, lastAction } = await getGameContractData({ wallet, gameContractAddr });
         const salt = localStorage.getItem(`${gameContractAddr}_salt`) as string;
         const movement = localStorage.getItem(`${gameContractAddr}_movement`) as string;
-        setGameInfo({ salt, movement, player2, lastAction: parseInt(lastAction) });
+        setGameInfo({ salt, movement, player2, lastAction: parseInt(lastAction) * 1000 });
       }
     })();
   }, [wallet, gameContractAddr]);
@@ -60,39 +60,44 @@ const CreatedGame: React.FC = () => {
       const confirmed = await checkPlayerReacted({ wallet, gameContractAddr });
 
       if (confirmed) {
+        setPlayer2Confirmed(true);
+        
         const winningStatus = await checkWinningStatus({
           wallet,
           gameContractAddr,
           salt: salt,
           movement: movement
         });
-        if (winningStatus === null) {
-          setPlayer2Confirmed(true);
-        } else {
+
+        if (winningStatus) {
           gameOver(winningStatus ? GameOverStatus.Winned : GameOverStatus.Defeated);
-        }
-      }
-    }
-
-    if (!player2Timeouted && lastAction) {
-      const currentTime = new Date().getTime();
-      const delta = currentTime - lastAction * 1000;
-
-      if (delta > TIMEOUT) {
-        const stake = await getStake({ wallet, gameContractAddr });
-        setPlayer2Timeouted(true);
-
-        if (stake === '0') {
-          gameOver(GameOverStatus.Refunded);
         } else {
-          gameOver(GameOverStatus.Timeouted);
-          setLoading(true);
+          const stake = await getStake({ wallet, gameContractAddr });
 
-          const timeouted = await player2Timeout({ wallet, gameContractAddr });
+          if (stake === '0') {
+            gameOver(GameOverStatus.Defeated);
+          }
+        }
+      } else if (!player2Timeouted && lastAction) {
+        const currentTime = new Date().getTime();
+        const delta = currentTime - lastAction;
 
-          if (timeouted) {
+        if (delta > TIMEOUT) {
+          const stake = await getStake({ wallet, gameContractAddr });
+          setPlayer2Timeouted(true);
+
+          if (stake === '0') {
             gameOver(GameOverStatus.Refunded);
-            setLoading(false);
+          } else {
+            gameOver(GameOverStatus.Timeouted);
+            setLoading(true);
+
+            const timeouted = await player2Timeout({ wallet, gameContractAddr });
+
+            if (timeouted) {
+              gameOver(GameOverStatus.Refunded);
+              setLoading(false);
+            }
           }
         }
       }
